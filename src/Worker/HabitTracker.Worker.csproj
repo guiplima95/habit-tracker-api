@@ -1,0 +1,29 @@
+<Project Sdk="Microsoft.NET.Sdk.Worker">
+
+	<PropertyGroup>
+		<TargetFramework>net9.0</TargetFramework>
+		<Nullable>enable</Nullable>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<UserSecretsId>dotnet-Worker-69177072-32d9-4a90-989e-6125ab2aa3b6</UserSecretsId>
+		<DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
+		<DockerfileContext>..\HabitTracker.API</DockerfileContext>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<!-- Host -->
+		<PackageReference Include="Microsoft.Extensions.Hosting" Version="9.0.2" />
+
+		<!-- Azure Service Bus -->
+		<PackageReference Include="Azure.Messaging.ServiceBus" Version="7.18.4" />
+
+		<!-- Health Checks — Service Bus -->
+		<PackageReference Include="AspNetCore.HealthChecks.AzureServiceBus" Version="8.0.1" />
+
+		<!-- Serilog -->
+		<PackageReference Include="Serilog.Extensions.Hosting" Version="8.0.0" />
+		<PackageReference Include="Serilog.Settings.Configuration" Version="8.0.4" />
+		<PackageReference Include="Serilog.Sinks.Console" Version="6.0.0" />
+		<PackageReference Include="Serilog.Sinks.Seq" Version="8.0.0" />
+	</ItemGroup>
+
+</Project>
