@@ -1,0 +1,7 @@
+{
+  "name": "Habitoo",
+  "integrations": {
+    "capacitor": {}
+  },
+  "type": "angular-standalone"
+}
