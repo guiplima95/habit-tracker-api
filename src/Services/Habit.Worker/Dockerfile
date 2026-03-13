@@ -1,11 +1,11 @@
 ﻿FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
 WORKDIR /src
 
-COPY ["HabitTracker.Worker.csproj", "./"]
-RUN dotnet restore "./HabitTracker.Worker.csproj"
+COPY ["Habit.Worker.csproj", "./"]
+RUN dotnet restore "./Habit.Worker.csproj"
 
 COPY . .
-RUN dotnet publish "./HabitTracker.Worker.csproj" \
+RUN dotnet publish "./Habit.Worker.csproj" \
     -c Release \
     -o /app/publish \
     --no-restore
@@ -18,4 +18,4 @@ USER appuser
 
 COPY --from=build /app/publish .
 
-ENTRYPOINT ["dotnet", "HabitTracker.Worker.dll"]
+ENTRYPOINT ["dotnet", "Habit.Worker.dll"]

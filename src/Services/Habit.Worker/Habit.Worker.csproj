@@ -6,7 +6,7 @@
 		<ImplicitUsings>enable</ImplicitUsings>
 		<UserSecretsId>dotnet-Worker-69177072-32d9-4a90-989e-6125ab2aa3b6</UserSecretsId>
 		<DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
-		<DockerfileContext>..\HabitTracker.API</DockerfileContext>
+		<DockerfileContext>..\Habit.API</DockerfileContext>
 	</PropertyGroup>
 
 	<ItemGroup>

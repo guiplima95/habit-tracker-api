@@ -76,6 +76,10 @@
 
 	<ItemGroup>
 		<Folder Include="Application\Users\Queries\" />
+		<Folder Include="Infrastructure\Cache\" />
+		<Folder Include="Infrastructure\Outbox\" />
+		<Folder Include="Infrastructure\Resilience\" />
+		<Folder Include="Infrastructure\Storage\" />
 	</ItemGroup>
 
 </Project>
