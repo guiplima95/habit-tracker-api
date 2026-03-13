@@ -1,0 +1,107 @@
+<ion-header>
+  <ion-toolbar class="insights-toolbar">
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/home"></ion-back-button>
+    </ion-buttons>
+    <ion-title>Insights</ion-title>
+    <ion-buttons slot="end">
+      <ion-button fill="clear" (click)="toggleTheme()" aria-label="Toggle theme">
+        <ion-icon slot="icon-only" [name]="isDarkMode ? 'sunny-outline' : 'moon-outline'"></ion-icon>
+      </ion-button>
+      <ion-button fill="clear" (click)="logout()" aria-label="Log out">
+        <ion-icon slot="icon-only" name="log-out-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true" class="ion-padding insights-content">
+  @if (hasHabits) {
+    <div class="insights-page">
+      <section class="insights-hero">
+        <p class="eyebrow">Weekly signal</p>
+        <h1>Insights that keep your streak honest</h1>
+        <p class="hero-copy">{{ pageSummary }}</p>
+      </section>
+
+      <section class="metrics-grid">
+        <ion-card class="metric-card">
+          <ion-card-content>
+            <p class="metric-label">Completion rate</p>
+            <h3 class="metric-value">{{ weeklyCompletionRate }}%</h3>
+            <p class="metric-helper">{{ completionSummary }}</p>
+          </ion-card-content>
+        </ion-card>
+
+        <ion-card class="metric-card">
+          <ion-card-content>
+            <p class="metric-label">Best category</p>
+            <h3 class="metric-value">{{ strongestCategory }}</h3>
+            <p class="metric-helper">{{ strongestCategorySummary }}</p>
+          </ion-card-content>
+        </ion-card>
+
+        <ion-card class="metric-card">
+          <ion-card-content>
+            <p class="metric-label">Average progress</p>
+            <h3 class="metric-value">{{ averageQuantitativeProgress }}%</h3>
+            <p class="metric-helper">{{ quantitativeProgressSummary }}</p>
+          </ion-card-content>
+        </ion-card>
+      </section>
+
+      <section class="charts-grid">
+        <ion-card class="chart-card chart-card-wide">
+          <ion-card-header>
+            <p class="card-kicker">Consistency</p>
+            <ion-card-title>4-Week Rhythm Map</ion-card-title>
+            <p class="card-description">Each cell shows whether a routine landed on that day.</p>
+          </ion-card-header>
+          <ion-card-content>
+            <div class="heatmap-wrapper">
+              <canvas #heatmapCanvas aria-label="4-week consistency heatmap"></canvas>
+            </div>
+          </ion-card-content>
+        </ion-card>
+
+        <ion-card class="chart-card">
+          <ion-card-header>
+            <p class="card-kicker">Progress</p>
+            <ion-card-title>7-Day Progress Curve</ion-card-title>
+            <p class="card-description">Average quantitative progress across the current week.</p>
+          </ion-card-header>
+          <ion-card-content>
+            <div class="trend-wrapper">
+              <canvas #trendCanvas aria-label="7-day quantitative progress trend"></canvas>
+            </div>
+          </ion-card-content>
+        </ion-card>
+      </section>
+
+      <section class="endcap-section">
+        <ion-card class="closing-card">
+          <ion-card-content>
+            <p class="metric-label">Next step</p>
+            <h3>{{ remainingHabitsCount ? 'Keep the day moving' : 'Today is wrapped' }}</h3>
+            <p class="endcap-copy">
+              @if (remainingHabitsCount) {
+                {{ remainingHabitsCount }} habit{{ remainingHabitsCount === 1 ? '' : 's' }} are still open on Home.
+              } @else {
+                Everything planned for today is complete. Come back tomorrow for a fresh rhythm check.
+              }
+            </p>
+            <ion-button routerLink="/home">Back to Home</ion-button>
+          </ion-card-content>
+        </ion-card>
+      </section>
+    </div>
+  } @else {
+    <div class="empty-state">
+      <ion-text color="medium">
+        <h3>No insight data yet</h3>
+        <p>Create your first habits to unlock weekly trends, rhythm mapping, and progress analytics.</p>
+      </ion-text>
+      <ion-button routerLink="/home">Go to Home</ion-button>
+    </div>
+  }
+</ion-content>

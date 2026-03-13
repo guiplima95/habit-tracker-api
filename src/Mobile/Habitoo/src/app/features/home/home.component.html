@@ -1,0 +1,193 @@
+<ion-header>
+  <ion-toolbar class="home-toolbar">
+    <div class="home-toolbar-shell">
+      <div class="headline-stack">
+        <p class="eyebrow">Daily overview</p>
+        <h1>{{ greeting }}</h1>
+        <p class="hero-subtitle">{{ focusSummary }}</p>
+      </div>
+
+      <div class="header-actions">
+        <ion-button class="header-action" fill="clear" (click)="toggleTheme()" aria-label="Toggle color theme">
+          <ion-icon slot="icon-only" [name]="isDarkMode ? 'sunny-outline' : 'moon-outline'"></ion-icon>
+        </ion-button>
+
+        <ion-button class="header-action" fill="clear" routerLink="/insights" aria-label="Open insights">
+          <ion-icon slot="icon-only" name="analytics-outline"></ion-icon>
+        </ion-button>
+
+        <ion-button class="header-action" fill="clear" (click)="logout()" aria-label="Log out">
+          <ion-icon slot="icon-only" name="log-out-outline"></ion-icon>
+        </ion-button>
+      </div>
+    </div>
+  </ion-toolbar>
+
+  <ion-toolbar class="segment-toolbar">
+    <ion-segment [value]="selectedCategory" (ionChange)="onSegmentChange($event)">
+      @for (category of categories; track category) {
+        <ion-segment-button [value]="category">
+          <ion-label>{{ category }}</ion-label>
+        </ion-segment-button>
+      }
+    </ion-segment>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true" class="ion-padding home-content">
+  <ion-grid fixed>
+    <ion-row class="ion-justify-content-center">
+      <ion-col size="12" sizeMd="10" sizeLg="8">
+        <section class="metrics-grid">
+          <ion-card class="metric-card">
+            <ion-card-content>
+              <p class="metric-label">Today's completion</p>
+              <h3>{{ (completionRatio * 100).toFixed(0) }}%</h3>
+            </ion-card-content>
+          </ion-card>
+
+          <ion-card class="metric-card">
+            <ion-card-content>
+              <p class="metric-label">Active streak</p>
+              <h3>{{ currentStreak }} days</h3>
+            </ion-card-content>
+          </ion-card>
+
+          <ion-card class="metric-card">
+            <ion-card-content>
+              <p class="metric-label">Still open</p>
+              <h3>{{ remainingHabitsCount }}</h3>
+            </ion-card-content>
+          </ion-card>
+
+          <ion-card class="metric-card metric-card-accent metric-card-wide">
+            <ion-card-content>
+              <p class="metric-label">Current focus</p>
+              <h3>{{ selectedCategory }}</h3>
+              <p class="metric-helper">
+                {{ filteredHabits.length }} habit{{ filteredHabits.length === 1 ? '' : 's' }} queued for this block
+              </p>
+            </ion-card-content>
+          </ion-card>
+        </section>
+
+        <section class="habits-shell">
+          <ion-card>
+            <ion-card-header>
+              <p class="section-kicker">Today plan</p>
+              <ion-card-title>{{ selectedCategory }} Focus</ion-card-title>
+              <p class="section-caption">{{ completedHabitsCount }} completed, {{ remainingHabitsCount }} to go</p>
+            </ion-card-header>
+
+            <ion-card-content>
+              @if (filteredHabits.length) {
+                <ion-list inset>
+                  @for (habit of filteredHabits; track habit.id) {
+                    <app-habit-item
+                      [habit]="habit"
+                      (habitCompleted)="markHabitCompleted($event)"
+                      (quantitativeAdjusted)="adjustQuantitative($event)"
+                      (habitRemoved)="removeHabit($event)"
+                    ></app-habit-item>
+                  }
+                </ion-list>
+              } @else {
+                <div class="empty-block">
+                  <ion-text color="medium">
+                    <p>No habits are scheduled for {{ selectedCategory.toLowerCase() }} yet.</p>
+                  </ion-text>
+                  <ion-button fill="outline" (click)="openCreateHabitModal()">
+                    Add your first habit
+                  </ion-button>
+                </div>
+              }
+            </ion-card-content>
+          </ion-card>
+        </section>
+      </ion-col>
+    </ion-row>
+  </ion-grid>
+
+  <ion-fab vertical="bottom" horizontal="end" slot="fixed">
+    <ion-fab-button (click)="openCreateHabitModal()" aria-label="Create habit">
+      <ion-icon name="add"></ion-icon>
+    </ion-fab-button>
+  </ion-fab>
+
+  <ion-modal [isOpen]="isCreateModalOpen" (didDismiss)="closeCreateHabitModal()">
+    <ng-template>
+      <ion-header>
+        <ion-toolbar>
+          <ion-title>Create Habit</ion-title>
+          <ion-buttons slot="end">
+            <ion-button (click)="closeCreateHabitModal()">Cancel</ion-button>
+          </ion-buttons>
+        </ion-toolbar>
+      </ion-header>
+
+      <ion-content class="ion-padding">
+        <form [formGroup]="createHabitForm" (ngSubmit)="createHabit()" class="create-form">
+          <ion-item>
+            <ion-input
+              label="Habit name"
+              labelPlacement="stacked"
+              fill="outline"
+              placeholder="Meditate for 10 minutes"
+              formControlName="name"
+            ></ion-input>
+          </ion-item>
+
+          <ion-item>
+            <ion-select label="Category" labelPlacement="stacked" formControlName="category">
+              @for (category of categories; track category) {
+                <ion-select-option [value]="category">{{ category }}</ion-select-option>
+              }
+            </ion-select>
+          </ion-item>
+
+          <ion-accordion-group>
+            <ion-accordion value="advanced-setup">
+              <ion-item slot="header">
+                <ion-label>Advanced options</ion-label>
+              </ion-item>
+
+              <div class="accordion-content" slot="content">
+                <ion-item>
+                  <ion-select label="Type" labelPlacement="stacked" formControlName="type">
+                    @for (habitType of habitTypes; track habitType) {
+                      <ion-select-option [value]="habitType">{{ habitType }}</ion-select-option>
+                    }
+                  </ion-select>
+                </ion-item>
+
+                @if (createHabitForm.controls.type.value === 'Quantitative') {
+                  <ion-item>
+                    <ion-input
+                      type="number"
+                      label="Target value"
+                      labelPlacement="stacked"
+                      formControlName="targetValue"
+                    ></ion-input>
+                  </ion-item>
+                }
+
+                <ion-item>
+                  <ion-input
+                    label="Schedule notes"
+                    labelPlacement="stacked"
+                    placeholder="Mon, Wed, Fri"
+                    formControlName="customSchedule"
+                  ></ion-input>
+                </ion-item>
+              </div>
+            </ion-accordion>
+          </ion-accordion-group>
+
+          <ion-button expand="block" type="submit" [disabled]="createHabitForm.invalid">
+            Save Habit
+          </ion-button>
+        </form>
+      </ion-content>
+    </ng-template>
+  </ion-modal>
+</ion-content>

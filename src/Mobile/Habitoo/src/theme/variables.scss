@@ -1,2 +1,76 @@
 // For information on how to create your own theme, please refer to:
 // https://ionicframework.com/docs/theming/
+
+:root {
+	--ion-color-primary: #4062ff;
+	--ion-color-primary-rgb: 64, 98, 255;
+	--ion-color-primary-contrast: #ffffff;
+	--ion-color-primary-contrast-rgb: 255, 255, 255;
+	--ion-color-primary-shade: #3856e0;
+	--ion-color-primary-tint: #5a78ff;
+
+	--ion-color-secondary: #00b894;
+	--ion-color-secondary-rgb: 0, 184, 148;
+	--ion-color-secondary-contrast: #00140e;
+	--ion-color-secondary-contrast-rgb: 0, 20, 14;
+	--ion-color-secondary-shade: #00a281;
+	--ion-color-secondary-tint: #1ac0a1;
+
+	--ion-color-warning: #ff9f43;
+	--ion-color-danger: #ff5f7d;
+	--ion-color-success: #28c76f;
+	--ion-background-color: #f4f8ff;
+	--ion-background-color-rgb: 244, 248, 255;
+	--ion-text-color: #13233d;
+	--ion-text-color-rgb: 19, 35, 61;
+	--ion-color-medium: #66758f;
+	--ion-color-medium-rgb: 102, 117, 143;
+
+	--app-font-display: 'Space Grotesk', 'Segoe UI', sans-serif;
+	--app-font-body: 'Manrope', 'Segoe UI', sans-serif;
+	--app-shell-background: #edf3ff;
+	--app-surface-gradient: radial-gradient(circle at 10% -10%, #dce7ff 0%, #f7fbff 42%, #ffffff 100%);
+	--app-card-background: rgba(255, 255, 255, 0.88);
+	--app-surface-elevated: rgba(255, 255, 255, 0.96);
+	--app-toolbar-background: rgba(255, 255, 255, 0.82);
+	--app-border-soft: rgba(31, 44, 70, 0.1);
+	--app-border-strong: rgba(31, 44, 70, 0.16);
+	--app-text-muted-strong: #61728d;
+	--app-text-muted-soft: #7c8da8;
+	--app-chart-grid: rgba(52, 72, 113, 0.12);
+	--app-chart-empty-cell: #dfe8f7;
+	--app-chart-area-fill: rgba(64, 98, 255, 0.18);
+	--app-tooltip-background: rgba(15, 23, 42, 0.94);
+	--app-tooltip-border: rgba(64, 98, 255, 0.22);
+	--app-shadow-soft: 0 10px 30px rgba(45, 68, 120, 0.12);
+}
+
+body.theme-dark {
+	--ion-color-primary: #7da1ff;
+	--ion-color-primary-rgb: 125, 161, 255;
+	--ion-color-primary-contrast: #09111f;
+	--ion-color-primary-contrast-rgb: 9, 17, 31;
+	--ion-color-primary-shade: #6e8ee0;
+	--ion-color-primary-tint: #8aacff;
+	--ion-background-color: #08111f;
+	--ion-background-color-rgb: 8, 17, 31;
+	--ion-text-color: #edf4ff;
+	--ion-text-color-rgb: 237, 244, 255;
+	--ion-color-medium: #a8b9d5;
+	--ion-color-medium-rgb: 168, 185, 213;
+	--app-shell-background: #08111f;
+	--app-surface-gradient: radial-gradient(circle at 12% -8%, #16315f 0%, #0a1426 42%, #08111f 100%);
+	--app-card-background: rgba(12, 22, 42, 0.88);
+	--app-surface-elevated: rgba(16, 28, 52, 0.96);
+	--app-toolbar-background: rgba(11, 19, 36, 0.86);
+	--app-border-soft: rgba(151, 180, 255, 0.18);
+	--app-border-strong: rgba(151, 180, 255, 0.28);
+	--app-text-muted-strong: #b8c8e1;
+	--app-text-muted-soft: #8fa3c6;
+	--app-chart-grid: rgba(151, 180, 255, 0.14);
+	--app-chart-empty-cell: rgba(151, 180, 255, 0.16);
+	--app-chart-area-fill: rgba(125, 161, 255, 0.22);
+	--app-tooltip-background: rgba(10, 18, 34, 0.98);
+	--app-tooltip-border: rgba(151, 180, 255, 0.2);
+	--app-shadow-soft: 0 14px 34px rgba(0, 0, 0, 0.34);
+}

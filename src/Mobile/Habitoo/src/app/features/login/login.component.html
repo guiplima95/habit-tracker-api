@@ -1,0 +1,67 @@
+<ion-content [fullscreen]="true" class="login-content">
+  <ion-grid class="login-grid">
+    <ion-row class="ion-justify-content-center ion-align-items-center login-row">
+      <ion-col size="12" sizeMd="8" sizeLg="5">
+        <section class="login-shell">
+          <div class="brand-hero">
+            <div class="logo-wrap">
+              <app-brand-mark class="brand-logo"></app-brand-mark>
+            </div>
+
+            <p class="login-kicker">Habit loop</p>
+            <h1 class="login-title">Habitoo</h1>
+            <ion-text color="medium">
+              <p class="login-subtitle">Build rituals that stay clear, measurable, and easy to keep.</p>
+            </ion-text>
+          </div>
+
+          <form [formGroup]="loginForm" (ngSubmit)="onSignIn()" class="login-form">
+            <ion-input
+              fill="outline"
+              label="Email"
+              labelPlacement="floating"
+              type="email"
+              formControlName="email"
+              autocomplete="email"
+            ></ion-input>
+
+            <ion-input
+              fill="outline"
+              label="Password"
+              labelPlacement="floating"
+              type="password"
+              formControlName="password"
+              autocomplete="current-password"
+            ></ion-input>
+
+            <ion-button expand="block" type="submit" [disabled]="loginForm.invalid || isLoading">
+              @if (isLoading) {
+                <ion-spinner name="crescent"></ion-spinner>
+                <span class="signin-copy">Signing in...</span>
+              } @else {
+                <span>Sign In</span>
+              }
+            </ion-button>
+
+            <ion-button
+              expand="block"
+              fill="outline"
+              type="button"
+              (click)="onGoogleSignIn()"
+              [disabled]="isLoading"
+            >
+              <ion-icon slot="start" name="logo-google"></ion-icon>
+              Continue with Google
+            </ion-button>
+
+            @if (errorMessage) {
+              <ion-text color="danger">
+                <p class="login-error">{{ errorMessage }}</p>
+              </ion-text>
+            }
+          </form>
+        </section>
+      </ion-col>
+    </ion-row>
+  </ion-grid>
+</ion-content>

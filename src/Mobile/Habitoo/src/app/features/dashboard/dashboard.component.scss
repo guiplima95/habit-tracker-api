@@ -1,0 +1,45 @@
+.dashboard-content {
+  --padding-bottom: 6rem;
+}
+
+.hero-section,
+.habits-section,
+.insights-link-section {
+  margin-bottom: 1.25rem;
+}
+
+.hero-section ion-card {
+  margin: 0;
+}
+
+.hero-section ion-card-title {
+  font-size: 1.4rem;
+  line-height: 1.2;
+}
+
+.hero-section ion-progress-bar {
+  margin-top: 0.75rem;
+}
+
+h2 {
+  margin: 0 0 0.75rem;
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: var(--ion-color-dark);
+}
+
+.add-habit-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.accordion-body {
+  padding: 0 0 0.5rem;
+}
+
+.error-copy {
+  margin: 0.25rem 1rem 0;
+  font-size: 0.8rem;
+  color: var(--ion-color-danger);
+}

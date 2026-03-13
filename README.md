@@ -1,120 +1,303 @@
-<h1 align="center">
-  <img alt="Habitoo Logo" src="https://via.placeholder.com/150x150.png?text=Habitoo+Logo" width="120px" />
-  <br/>
-  Habitoo - Next-Generation Habit Tracker
-</h1>
+# Habitoo
 
-<p align="center">
-  <b>Habitoo</b> is a full-stack, mobile-first habit tracking platform engineered with behavioral psychology principles to help users build consistency and achieve long-term goals.
-</p>
+Habitoo is a mobile-first habit tracking monorepo with an Ionic/Angular client and a .NET backend organized around CQRS-style application layering and asynchronous event processing.
 
-<p align="center">
-  <img alt="GitHub language count" src="https://img.shields.io/github/languages/count/guiplima95/habit-tracker-api">
-  <img alt="Repository size" src="https://img.shields.io/github/repo-size/guiplima95/habit-tracker-api">
-  <img alt="License" src="https://img.shields.io/github/license/guiplima95/habit-tracker-api">
-  <img alt=".NET Version" src="https://img.shields.io/badge/.NET-8.0+-512BD4?style=flat&logo=dotnet&logoColor=white">
-  <img alt="Angular Version" src="https://img.shields.io/badge/Angular-19+-DD0031?style=flat&logo=angular&logoColor=white">
-  <img alt="Ionic Version" src="https://img.shields.io/badge/Ionic-8+-3880FF?style=flat&logo=ionic&logoColor=white">
-</p>
+The repository already contains the foundation for an event-driven backend, but the product is still in an in-progress state:
 
-<p align="center">
-  <a href="#-about-the-project">About</a>&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;
-  <a href="#-features">Features</a>&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;
-  <a href="#-technologies">Technologies</a>&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;
-  <a href="#-architecture--monorepo-structure">Architecture</a>&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;
-  <a href="#-how-to-run">How to Run</a>
-</p>
+- The mobile app currently runs with mocked authentication and local habit persistence.
+- The main API and background worker are real .NET services.
+- Azure Service Bus is already wired into the backend event flow.
+- Analytics, notifications, and Azure Functions projects are present, but they are still scaffold-level services.
 
-<br>
-
-## 📖 About the Project
-
-**Habitoo** is a comprehensive platform designed for individuals seeking a clean, data-driven approach to tracking their daily routines. Built around the concept of the "Habit Loop" and the "Two-Minute Rule", the app minimizes friction and maximizes consistency.
-
-This repository is a **Monorepo** containing both the robust **.NET Web API backend** and the cross-platform **Ionic/Angular frontend**. By centralizing the codebase, we ensure seamless data synchronization, shared architectural context, and unified deployment pipelines.
-
----
-
-## ✨ Features
-
-### Frontend (Mobile & Web)
-- **Smart Dashboard:** Habits are contextually grouped by time of day (Morning, Afternoon, Evening) using an intuitive UI.
-- **Contribution Heatmap:** A GitHub-style progress matrix powered by `Chart.js`, visualizing consistency over months.
-- **Offline-First Synchronization:** Logs are queued locally via Capacitor Storage and synced when internet connectivity is restored.
-- **Dual Authentication:** Social login via Google (Capacitor Google Auth) and standard email registration using JWT.
-- **Quantitative & Binary Tracking:** Track "Yes/No" habits alongside numerical goals (e.g., "Read 20 pages") with visual progress bars.
-
-### Backend (API & Services)
-- **Centralized Streak Engine:** Streak logic, grace periods, and "streak freezes" are calculated securely on the server to prevent timezone manipulation.
-- **Multi-Channel Notifications:** Background workers schedule and dispatch contextual reminders via WhatsApp (Twilio) and Email (SendGrid).
-- **Scalable Data Modeling:** Relational database handling users, habit configurations, daily logs, and dynamic achievements.
-- **Secure Identity Management:** Role-based access control and secure JWT generation and validation.
-
----
-
-## 🛠️ Technologies
-
-### 🖥️ Frontend Stack
-- **[Angular 19+](https://angular.dev/)** - Core framework using Standalone Components.
-- **[Ionic 8](https://ionicframework.com/)** - Native UI components for cross-platform deployment (iOS, Android, Web).
-- **[Capacitor](https://capacitorjs.com/)** - Runtime for accessing native device APIs.
-- **[Chart.js](https://www.chartjs.org/)** - Lightweight library for rendering analytical charts and heatmaps.
-
-### ⚙️ Backend Stack
-- **[.NET 8+ / C#](https://dotnet.microsoft.com/)** - High-performance Web API framework.
-- **[Entity Framework Core](https://learn.microsoft.com/en-us/ef/core/)** - ORM for robust database management (PostgreSQL/SQLite).
-- **[Twilio API](https://www.twilio.com/)** - Integration for automated WhatsApp reminders.
-- **[SendGrid](https://sendgrid.com/)** - Transactional email delivery for reports and alerts.
-- **[Swagger / OpenAPI](https://swagger.io/)** - API documentation and testing interface.
-
----
-
-## 📂 Architecture & Monorepo Structure
-
-The project is divided into two main environments residing in the same repository:
+## Repository layout
 
 ```text
-habitoo/
- ├── backend/               # .NET Core Web API
- │   ├── Controllers/       # API Endpoints (Auth, Habits, Logs)
- │   ├── Models/            # Entity models and DTOs
- │   ├── Data/              # EF Core DbContext and Migrations
- │   └── Services/          # Business logic (StreakEngine, NotificationService)
- │
- ├── frontend/              # Ionic + Angular Application
- │   ├── src/app/core/      # Singleton services (AuthService, SyncQueue) and Interceptors
- │   ├── src/app/shared/    # Reusable UI components (HabitCard, HeatmapChart)
- │   └── src/app/features/  # Main application views (Dashboard, Insights, Settings)
- │
- └── README.md
+habit-tracker-api/
+├── README.md
+└── src/
+    ├── Habitoo.sln
+    ├── Mobile/
+    │   └── Habitoo/
+    │       ├── package.json
+    │       └── src/
+    │           ├── app/
+    │           │   ├── core/
+    │           │   ├── features/
+    │           │   └── shared/
+    │           ├── global.scss
+    │           └── theme/
+    └── Services/
+        ├── Habit.API/
+        ├── Habit.Worker/
+        ├── Analytic.API/
+        ├── Notifications.Worker/
+        └── Habit.Functions/
+```
 
---------------------------------------------------------------------------------
-🚀 How to Run
-Prerequisites
-Node.js (LTS) & Ionic CLI (npm i -g @ionic/cli)
-.NET SDK (v8.0 or higher)
-A Database (SQLite is configured by default for development)
-1. Running the Backend API
-# Navigate to the backend directory
-$ cd backend
+## Current implementation status
 
-# Restore .NET dependencies
-$ dotnet restore
+### Mobile app
 
-# Apply database migrations
-$ dotnet ef database update
+- Built with Angular 20, Ionic 8, and Capacitor 8.
+- Uses standalone components.
+- Uses `@capacitor/preferences` for mocked session persistence.
+- Uses local storage for mocked habit state.
+- Includes a modern login flow, daily home view, habit creation modal, and an insights screen with Chart.js visualizations.
+- Does not yet consume the backend API.
 
-# Run the API
-$ dotnet run
-The Swagger documentation will be available at http://localhost:5000/swagger.
-2. Running the Frontend App
-Open a new terminal window:
-# Navigate to the frontend directory
-$ cd frontend
+### Backend
 
-# Install npm dependencies
-$ npm install
+- Built on .NET 9.
+- Main HTTP entry point is `Habit.API`.
+- Main asynchronous consumer is `Habit.Worker`.
+- Messaging uses Azure Service Bus topic publishing and subscription-based processing.
+- The backend already separates `Application`, `Domain`, and `Infrastructure` concerns.
+- Some services in the solution are still placeholders and should be documented as such, not treated as production-ready bounded contexts.
 
-# Run the application in development mode
-$ ionic serve
-The app will automatically open in your browser at http://localhost:8100.
+## Architecture overview
+
+### Monorepo structure
+
+- `src/Mobile/Habitoo`: Ionic/Angular client.
+- `src/Services/Habit.API`: core habits API and composition root.
+- `src/Services/Habit.Worker`: background consumer for asynchronous habit events.
+- `src/Services/Analytic.API`: scaffold API, currently still template-level.
+- `src/Services/Notifications.Worker`: scaffold worker, currently still template-level.
+- `src/Services/Habit.Functions`: scaffold Azure Functions project.
+
+### Backend style
+
+The current backend is best described as a layered, event-driven foundation:
+
+- HTTP writes enter through `Habit.API` minimal endpoints.
+- Commands are handled through MediatR in the application layer.
+- Aggregates and notifications live in the domain layer.
+- Persistence and messaging adapters live in infrastructure.
+- After a successful write, the API is prepared to publish domain events to Azure Service Bus.
+- `Habit.Worker` subscribes to the `habit-events` topic and processes events asynchronously.
+
+### Event-driven flow
+
+```mermaid
+flowchart LR
+    A[Mobile app] --> B[Habit.API]
+    B --> C[Application command handler]
+    C --> D[(SQL Server)]
+    C --> E[Domain events]
+    E --> F[Azure Service Bus topic: habit-events]
+    F --> G[Habit.Worker subscription: HabitCreated]
+    G --> H[Async consumer processing]
+    H --> I[Future analytics, notifications, integrations]
+```
+
+### Important architectural notes
+
+- `Habit.API` is the real backend center of gravity today.
+- `Habit.Worker` is the active asynchronous runtime for message handling.
+- `Analytic.API`, `Notifications.Worker`, and `Habit.Functions` should currently be treated as extension points, not complete product services.
+- An `Infrastructure/Outbox` folder exists in `Habit.API`, but a persisted outbox flow is not implemented yet.
+- The API command pipeline publishes whatever exists in `habit.DomainEvents`, but the current aggregate implementation still needs stronger domain-event emission to make the async pipeline fully effective.
+
+## Service breakdown
+
+### Habit.API
+
+Purpose:
+Core HTTP service for habit commands and queries.
+
+Highlights:
+
+- ASP.NET Core minimal endpoints.
+- MediatR command handling.
+- FluentValidation pipeline behaviors.
+- EF Core with SQL Server for writes.
+- Dapper available for read-side queries.
+- Azure Service Bus publisher.
+- Serilog, OpenTelemetry, Swagger, and health checks.
+
+Primary responsibilities:
+
+- Accept habit-related HTTP requests.
+- Validate requests and coordinate domain operations.
+- Persist aggregate state.
+- Publish integration-relevant events after successful writes.
+
+### Habit.Worker
+
+Purpose:
+Dedicated asynchronous consumer for backend events.
+
+Highlights:
+
+- Hosted background service.
+- Azure Service Bus processor.
+- Manual message completion and dead-letter handling.
+- Health checks and structured logging.
+
+Primary responsibilities:
+
+- Subscribe to the `habit-events` topic.
+- Process `HabitCreated` messages.
+- Isolate asynchronous work away from synchronous HTTP request latency.
+
+### Analytic.API
+
+Purpose:
+Reserved analytics-facing service boundary.
+
+Current state:
+Template API only. Not yet integrated into the core flow.
+
+### Notifications.Worker
+
+Purpose:
+Reserved background boundary for outbound notifications and reminder orchestration.
+
+Current state:
+Template worker only. Consumers and services folders are present but not implemented.
+
+### Habit.Functions
+
+Purpose:
+Reserved Azure Functions entry point for cloud-triggered workflows.
+
+Current state:
+Sample blob-trigger function only. Not yet part of the main local development loop.
+
+## Frontend experience
+
+The current mobile experience is intentionally optimized for fast UI iteration.
+
+## User stories
+
+### Product stories
+
+- As a user, I want to sign in quickly and resume where I left off, so that habit tracking feels immediate instead of administrative.
+- As a user, I want to create a habit with a name, schedule context, and type, so that I can model both simple and measurable routines.
+- As a user, I want to track habits in Morning, Afternoon, and Evening buckets, so that my list matches the flow of my day.
+- As a user, I want to mark habits complete or update measurable progress with immediate feedback, so that small wins feel visible and motivating.
+- As a user, I want an insights screen that shows completion trends and consistency patterns, so that I can understand how stable my routine really is.
+- As a user, I want my local progress to survive reloads while the backend integration is still under construction, so that the prototype remains usable day to day.
+
+### Backend and system stories
+
+- As the platform, I want habit writes to be handled through application commands, so that validation, business rules, and persistence stay centralized.
+- As the platform, I want backend events to be published to Azure Service Bus after successful writes, so that follow-up work can happen asynchronously.
+- As the platform, I want a dedicated worker to consume habit events, so that analytics, notifications, and future integrations do not block the HTTP request path.
+- As an operator, I want health checks, structured logging, and traces in the core services, so that failures in the API or worker can be diagnosed quickly.
+- As the architecture evolves, I want analytics, notifications, and functions to become separate execution boundaries, so that the monorepo can grow without collapsing everything into one service.
+
+## Tech stack
+
+### Frontend
+
+- Angular 20
+- Ionic 8
+- Capacitor 8
+- Chart.js
+- chartjs-chart-matrix
+- RxJS
+
+### Backend
+
+- .NET 9
+- ASP.NET Core minimal APIs
+- MediatR
+- FluentValidation
+- EF Core 9 with SQL Server
+- Dapper
+- Azure Service Bus
+- Serilog
+- OpenTelemetry
+
+## Local development
+
+## Prerequisites
+
+- Node.js 20 or newer
+- npm
+- .NET 9 SDK
+- SQL Server reachable at `localhost,1433` or an equivalent connection string override
+- Azure Service Bus connection string for the backend event pipeline
+- Optional: Seq at `http://localhost:5341` if you want structured log aggregation
+
+## Restore dependencies
+
+```bash
+dotnet restore src/Habitoo.sln
+cd src/Mobile/Habitoo
+npm install
+```
+
+## Run the mobile app
+
+```bash
+cd src/Mobile/Habitoo
+npm start
+```
+
+Expected local URL:
+
+- `http://localhost:4200`
+
+## Run the core backend API
+
+```bash
+dotnet run --project src/Services/Habit.API/Habit.API.csproj
+```
+
+Expected local URLs:
+
+- `http://localhost:5012`
+- `https://localhost:7142`
+
+Swagger UI is exposed at the application root in development.
+
+## Run the asynchronous worker
+
+```bash
+dotnet run --project src/Services/Habit.Worker/Habit.Worker.csproj
+```
+
+This worker expects the `ServiceBus` connection string from `src/Services/Habit.Worker/appsettings.Development.json` or an environment override.
+
+## Optional scaffold services
+
+These projects exist in the solution but are not yet part of the main product loop:
+
+```bash
+dotnet run --project src/Services/Analytic.API/Analytic.API.csproj
+dotnet run --project src/Services/Notifications.Worker/Notifications.Worker.csproj
+dotnet run --project src/Services/Habit.Functions/Habit.Functions.csproj
+```
+
+Use them as scaffolds while the architecture evolves, not as fully integrated services.
+
+## Configuration notes
+
+### Habit.API
+
+Development configuration currently expects:
+
+- `ConnectionStrings:SqlServer`
+- `ConnectionStrings:ServiceBus`
+- `Seq:ServerUrl`
+
+### Habit.Worker
+
+Development configuration currently expects:
+
+- `ConnectionStrings:ServiceBus`
+- `Seq:ServerUrl`
+
+## Current gaps and next architecture steps
+
+- Raise and persist domain events more consistently from the aggregates.
+- Implement a real outbox to guarantee reliable event publication.
+- Replace mocked mobile auth and local habit state with API-backed flows.
+- Turn `Notifications.Worker`, `Analytic.API`, and `Habit.Functions` into real bounded execution paths.
+- Close the loop between frontend actions, backend persistence, and asynchronous downstream processing.
+
+## Summary
+
+Habitoo is already more than a UI prototype, but it is not yet a fully integrated product. The mobile app is currently optimized for UX iteration, while the backend has the beginnings of a serious event-driven architecture centered on `Habit.API` and `Habit.Worker`. The next meaningful step is to connect the frontend to the backend and harden the event pipeline with proper domain-event emission and an outbox implementation.

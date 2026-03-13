@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;700&display=swap');
+
 /*
  * App Global CSS
  * ----------------------------------------------------------------------------
@@ -34,4 +36,63 @@
 
 /* @import "@ionic/angular/css/palettes/dark.always.css"; */
 /* @import "@ionic/angular/css/palettes/dark.class.css"; */
-@import '@ionic/angular/css/palettes/dark.system.css';
+/* @import '@ionic/angular/css/palettes/dark.system.css'; */
+
+html,
+body,
+ion-app,
+ion-content {
+	font-family: var(--app-font-body);
+	color: var(--ion-text-color);
+}
+
+body {
+	background: var(--app-shell-background);
+	transition: background-color 180ms ease, color 180ms ease;
+}
+
+ion-title,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+	font-family: var(--app-font-display);
+	letter-spacing: -0.01em;
+}
+
+ion-content {
+	--background: var(--app-surface-gradient);
+}
+
+ion-card {
+	border-radius: 16px;
+}
+
+ion-card-title {
+	color: var(--ion-text-color);
+}
+
+ion-toolbar {
+	--background: var(--app-toolbar-background);
+	--border-color: var(--app-border-soft);
+	backdrop-filter: blur(14px);
+}
+
+body.theme-dark ion-toolbar {
+	--background: var(--app-toolbar-background);
+}
+
+body.theme-dark ion-segment {
+	--background: rgba(255, 255, 255, 0.04);
+}
+
+body.theme-dark ion-item {
+	--background: transparent;
+	--color: var(--ion-text-color);
+}
+
+body.theme-dark canvas {
+	filter: saturate(1.05) brightness(0.96);
+}

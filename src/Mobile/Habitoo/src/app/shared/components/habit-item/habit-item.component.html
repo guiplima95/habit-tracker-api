@@ -1,0 +1,46 @@
+<ion-item-sliding #slidingItem (ionSwipe)="completeHabit(slidingItem)">
+  <ion-item [class.habit-completed]="habit.completed" [class.habit-in-progress]="statusLabel === 'In progress'">
+    <ion-label>
+      <h2>{{ habit.name }}</h2>
+      <p>{{ habit.category }} routine</p>
+
+      @if (habit.customSchedule) {
+        <p class="habit-schedule">Schedule: {{ habit.customSchedule }}</p>
+      }
+
+      @if (habit.type === 'Quantitative') {
+        <div class="quantitative-controls">
+          <ion-button fill="clear" size="small" aria-label="Decrease value" (click)="adjustQuantitative(-1)">
+            <ion-icon slot="icon-only" name="remove"></ion-icon>
+          </ion-button>
+
+          <p class="habit-progress-copy">
+            {{ habit.currentValue ?? 0 }} / {{ habit.targetValue ?? 0 }}
+          </p>
+
+          <ion-button fill="clear" size="small" aria-label="Increase value" (click)="adjustQuantitative(1)">
+            <ion-icon slot="icon-only" name="add"></ion-icon>
+          </ion-button>
+        </div>
+
+        <ion-progress-bar class="quantitative-progress" [value]="progressValue"></ion-progress-bar>
+      }
+    </ion-label>
+
+    <ion-badge [color]="statusColor">{{ statusLabel }}</ion-badge>
+  </ion-item>
+
+  <ion-item-options side="start">
+    <ion-item-option color="danger" expandable (click)="removeHabit()">
+      <ion-icon slot="start" name="trash-outline"></ion-icon>
+      Remove
+    </ion-item-option>
+  </ion-item-options>
+
+  <ion-item-options side="end">
+    <ion-item-option color="primary" expandable (click)="completeHabit(slidingItem)">
+      <ion-icon slot="start" name="checkmark"></ion-icon>
+      Complete
+    </ion-item-option>
+  </ion-item-options>
+</ion-item-sliding>

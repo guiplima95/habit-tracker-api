@@ -1,0 +1,138 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title>Habitoo Dashboard</ion-title>
+  </ion-toolbar>
+
+  <ion-toolbar>
+    <ion-segment [value]="selectedCategory" (ionChange)="onSegmentChange($event)">
+      @for (category of categories; track category) {
+        <ion-segment-button [value]="category">
+          <ion-label>{{ category }}</ion-label>
+        </ion-segment-button>
+      }
+    </ion-segment>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true" class="dashboard-content ion-padding">
+  <section class="hero-section">
+    <ion-card>
+      <ion-card-header>
+        <ion-card-title>{{ currentStreakDays }}-day streak</ion-card-title>
+      </ion-card-header>
+      <ion-card-content>
+        <ion-text color="medium">{{ completionPercentageLabel }}</ion-text>
+        <ion-progress-bar [value]="completionRatio"></ion-progress-bar>
+      </ion-card-content>
+    </ion-card>
+  </section>
+
+  <section class="habits-section">
+    <h2>{{ selectedCategory }} Habits</h2>
+    <ion-list inset>
+      @for (habit of filteredHabits; track habit.id) {
+        <app-habit-item
+          [habit]="habit"
+          (habitCompleted)="markHabitCompleted($event)"
+          (quantitativeAdjusted)="adjustQuantitativeValue($event)"
+        ></app-habit-item>
+      } @empty {
+        <ion-item>
+          <ion-label>No habits yet for this period.</ion-label>
+        </ion-item>
+      }
+    </ion-list>
+  </section>
+
+  <section class="insights-link-section">
+    <ion-button fill="outline" expand="block" routerLink="/insights">
+      Open Consistency Insights
+    </ion-button>
+  </section>
+
+  <ion-fab vertical="bottom" horizontal="end" slot="fixed">
+    <ion-fab-button (click)="openAddHabitModal()" aria-label="Add habit">
+      <ion-icon name="add"></ion-icon>
+    </ion-fab-button>
+  </ion-fab>
+
+  <ion-modal [isOpen]="isAddHabitModalOpen" (didDismiss)="closeAddHabitModal()">
+    <ng-template>
+      <ion-header>
+        <ion-toolbar>
+          <ion-title>New Habit</ion-title>
+          <ion-buttons slot="end">
+            <ion-button (click)="closeAddHabitModal()">Cancel</ion-button>
+          </ion-buttons>
+        </ion-toolbar>
+      </ion-header>
+
+      <ion-content class="ion-padding">
+        <form [formGroup]="addHabitForm" (ngSubmit)="createHabit()" class="add-habit-form">
+          <ion-item>
+            <ion-input
+              label="Name"
+              labelPlacement="stacked"
+              placeholder="Read for 10 minutes"
+              formControlName="name"
+            ></ion-input>
+          </ion-item>
+
+          @if (addHabitForm.controls.name.invalid && addHabitForm.controls.name.touched) {
+            <p class="error-copy">A habit name is required.</p>
+          }
+
+          <ion-item>
+            <ion-select label="Category" labelPlacement="stacked" formControlName="category">
+              @for (category of categories; track category) {
+                <ion-select-option [value]="category">{{ category }}</ion-select-option>
+              }
+            </ion-select>
+          </ion-item>
+
+          <ion-accordion-group>
+            <ion-accordion value="advanced-options">
+              <ion-item slot="header">
+                <ion-label>Advanced options</ion-label>
+              </ion-item>
+
+              <div class="accordion-body" slot="content">
+                <ion-item>
+                  <ion-select label="Type" labelPlacement="stacked" formControlName="type">
+                    @for (habitType of habitTypes; track habitType) {
+                      <ion-select-option [value]="habitType">{{ habitType }}</ion-select-option>
+                    }
+                  </ion-select>
+                </ion-item>
+
+                @if (addHabitForm.controls.type.value === 'Quantitative') {
+                  <ion-item>
+                    <ion-input
+                      type="number"
+                      label="Target value"
+                      labelPlacement="stacked"
+                      formControlName="targetValue"
+                    ></ion-input>
+                  </ion-item>
+                }
+
+                <ion-item>
+                  <ion-input
+                    label="Custom schedule"
+                    labelPlacement="stacked"
+                    placeholder="Mon, Wed, Fri"
+                    formControlName="customSchedule"
+                  ></ion-input>
+                </ion-item>
+              </div>
+            </ion-accordion>
+          </ion-accordion-group>
+
+          <ion-button expand="block" type="submit" [disabled]="addHabitForm.invalid">
+            Save Habit
+          </ion-button>
+        </form>
+      </ion-content>
+    </ng-template>
+  </ion-modal>
+</ion-content>
