@@ -11,7 +11,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Habit.Functions", "Services
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Notifications.Worker", "Services\Notifications.Worker\Notifications.Worker.csproj", "{85FF5275-2E6C-4414-8A29-3062A9A0C9C1}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Analytic.API", "Services\Analytic.API\Analytic.API.csproj", "{C670B24D-6276-414C-8C86-7A5B4E77619C}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Analytics.API", "Services\Analytics.API\Analytics.API.csproj", "{C670B24D-6276-414C-8C86-7A5B4E77619C}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

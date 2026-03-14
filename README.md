@@ -29,7 +29,7 @@ habit-tracker-api/
     └── Services/
         ├── Habit.API/
         ├── Habit.Worker/
-        ├── Analytic.API/
+        ├── Analytics.API/
         ├── Notifications.Worker/
         └── Habit.Functions/
 ```
@@ -61,20 +61,59 @@ habit-tracker-api/
 - `src/Mobile/Habitoo`: Ionic/Angular client.
 - `src/Services/Habit.API`: core habits API and composition root.
 - `src/Services/Habit.Worker`: background consumer for asynchronous habit events.
-- `src/Services/Analytic.API`: scaffold API, currently still template-level.
+- `src/Services/Analytics.API`: reserved insights API for analytics-oriented read models.
 - `src/Services/Notifications.Worker`: scaffold worker, currently still template-level.
 - `src/Services/Habit.Functions`: scaffold Azure Functions project.
 
-### Backend style
+### Clean Architecture in practice
 
-The current backend is best described as a layered, event-driven foundation:
+`Habit.API` follows a pragmatic Clean Architecture style with explicit layer boundaries and dependency direction.
 
-- HTTP writes enter through `Habit.API` minimal endpoints.
-- Commands are handled through MediatR in the application layer.
-- Aggregates and notifications live in the domain layer.
-- Persistence and messaging adapters live in infrastructure.
-- After a successful write, the API is prepared to publish domain events to Azure Service Bus.
-- `Habit.Worker` subscribes to the `habit-events` topic and processes events asynchronously.
+| Layer | Main folders | Responsibility | Depends on |
+| --- | --- | --- | --- |
+| Presentation | `Apis/Endpoints`, `Apis/Middleware` | HTTP transport, endpoint contracts, API-level error mapping | Application |
+| Application | `Application/*` | Use-case orchestration, MediatR handlers, CQRS commands/queries, pipeline behaviors | Domain |
+| Domain | `Domain/*` | Business rules, aggregates, value objects, domain notifications/events | No outer layer |
+| Infrastructure | `Infrastructure/*` | EF Core, repositories, Dapper, Service Bus, health checks, security adapters | Application/Domain abstractions |
+
+Concrete wiring in code:
+
+- `Program.cs` composes the app through `AddApplication()` and `AddInfrastructure()`.
+- `Application/Extensions/ApplicationExtensions.cs` registers MediatR and cross-cutting behaviors (`LoggingBehavior`, `ValidationBehavior`).
+- `Infrastructure/Extensions/InfrastructureExtensions.cs` configures SQL Server, repositories, Service Bus publisher, and health checks.
+- `Infrastructure/Data/AppDbContext.cs` implements `IUnitOfWork`, preserving transaction ownership behind an application abstraction.
+
+### DDD tactical design and rich-domain direction
+
+The project already includes several DDD tactical patterns that are useful for study.
+
+Aggregate roots and entities:
+
+- `Domain/Entities/HabitAggregate/Habit.cs` (aggregate root)
+- `Domain/Entities/UserAggregate/User.cs` (aggregate root)
+- `Domain/Entities/HabitAggregate/HabitLog.cs` (child entity)
+
+Value objects:
+
+- `Domain/ValueObjects/HabitName.cs`
+- `Domain/ValueObjects/Frequency.cs`
+- `Domain/ValueObjects/UserName.cs`
+- `Domain/ValueObjects/Email.cs`
+
+Persistence mapping reinforces DDD semantics by using EF Core owned types:
+
+- `Infrastructure/Data/Configurations/HabitConfiguration.cs`
+- `Infrastructure/Data/Configurations/UserConfiguration.cs`
+
+Domain validation and invariants:
+
+- Aggregate factories and behaviors use a Notification pattern (`Domain/Notifications/Notification.cs`) to accumulate business-rule violations without relying on exception flow for expected cases.
+
+Rich-domain status (important study note):
+
+- The model has a rich-domain shape (behavior methods + value objects + domain events).
+- There is an intentional improvement area: `CreateHabitCommandHandler` publishes `habit.DomainEvents`, but `Habit` currently does not call `RaiseDomainEvent(...)` in key transitions.
+- `User` keeps a separate private `_domainEvents` list and should be aligned to the `Entity.DomainEvents` pipeline for consistency across aggregates.
 
 ### Event-driven flow
 
@@ -88,15 +127,82 @@ flowchart LR
     F --> G[Habit.Worker subscription: HabitCreated]
     G --> H[Async consumer processing]
     H --> I[Future analytics, notifications, integrations]
+    I --> J[Analytics.API insights endpoints]
 ```
+
+### Outbox pattern implementation track using the existing worker
+
+Current state:
+
+- `CreateHabitCommandHandler` commits to SQL Server and then calls `IServiceBusPublisher`.
+- This is a good first event-driven step, but it is not a transactional outbox yet.
+
+Why move to Outbox:
+
+- Without outbox, a crash between commit and publish can lose integration events.
+- Outbox makes persistence and event registration atomic.
+
+Recommended study design for this repo:
+
+```mermaid
+sequenceDiagram
+    participant API as Habit.API
+    participant DB as SQL Server
+    participant Relay as Worker Outbox Relay
+    participant Bus as Azure Service Bus
+    participant Consumer as Worker Event Consumer
+
+    API->>DB: Save aggregate state
+    API->>DB: Save OutboxMessage (same transaction)
+    API->>DB: Commit
+    Relay->>DB: Poll pending outbox rows
+    Relay->>Bus: Publish event
+    Relay->>DB: Mark row as processed
+    Bus->>Consumer: Deliver message
+```
+
+How the current worker helps:
+
+- Keep the existing `Habit.Worker` consumer path for business-event processing.
+- Add an outbox relay hosted service (same worker project or dedicated worker) that publishes pending rows.
+- This keeps the architecture event-driven while adding delivery reliability.
+
+Suggested outbox table for the study path:
+
+```sql
+CREATE TABLE OutboxMessages (
+    Id UNIQUEIDENTIFIER NOT NULL PRIMARY KEY,
+    AggregateType NVARCHAR(150) NOT NULL,
+    AggregateId UNIQUEIDENTIFIER NOT NULL,
+    EventType NVARCHAR(200) NOT NULL,
+    Payload NVARCHAR(MAX) NOT NULL,
+    OccurredOnUtc DATETIME2 NOT NULL,
+    ProcessedOnUtc DATETIME2 NULL,
+    Error NVARCHAR(2000) NULL,
+    RetryCount INT NOT NULL DEFAULT 0
+);
+
+CREATE INDEX IX_OutboxMessages_Pending
+ON OutboxMessages (ProcessedOnUtc, OccurredOnUtc)
+WHERE ProcessedOnUtc IS NULL;
+```
+
+Implementation checklist:
+
+1. Add an `OutboxMessage` entity and EF mapping in `Infrastructure/Outbox`.
+2. Persist aggregate changes and outbox rows in the same `IUnitOfWork.CommitAsync` transaction.
+3. Implement a relay process in worker runtime that publishes outbox rows in batches.
+4. Mark rows as processed, store retry metadata, and dead-letter poison payloads.
+5. Add idempotency keys and observability metrics for pending/failed/published counts.
 
 ### Important architectural notes
 
 - `Habit.API` is the real backend center of gravity today.
 - `Habit.Worker` is the active asynchronous runtime for message handling.
-- `Analytic.API`, `Notifications.Worker`, and `Habit.Functions` should currently be treated as extension points, not complete product services.
+- `Analytics.API`, `Notifications.Worker`, and `Habit.Functions` should currently be treated as extension points, not complete product services.
 - An `Infrastructure/Outbox` folder exists in `Habit.API`, but a persisted outbox flow is not implemented yet.
 - The API command pipeline publishes whatever exists in `habit.DomainEvents`, but the current aggregate implementation still needs stronger domain-event emission to make the async pipeline fully effective.
+- The worker is the natural place to evolve into an Outbox Relay + Event Consumer runtime for resilient delivery.
 
 ## Service breakdown
 
@@ -140,13 +246,19 @@ Primary responsibilities:
 - Process `HabitCreated` messages.
 - Isolate asynchronous work away from synchronous HTTP request latency.
 
-### Analytic.API
+### Analytics.API
 
 Purpose:
-Reserved analytics-facing service boundary.
+Insights-facing API boundary for analytical queries and projections.
 
 Current state:
 Template API only. Not yet integrated into the core flow.
+
+Target responsibility:
+
+- Expose read-focused endpoints for consistency trends, streak summaries, completion curves, and other insight views.
+- Consume projections produced from asynchronous habit events rather than coupling the mobile insights screen directly to the write model.
+- Become the natural backend for replacing the current mocked insights experience in the mobile app.
 
 ### Notifications.Worker
 
@@ -186,6 +298,7 @@ The current mobile experience is intentionally optimized for fast UI iteration.
 - As the platform, I want a dedicated worker to consume habit events, so that analytics, notifications, and future integrations do not block the HTTP request path.
 - As an operator, I want health checks, structured logging, and traces in the core services, so that failures in the API or worker can be diagnosed quickly.
 - As the architecture evolves, I want analytics, notifications, and functions to become separate execution boundaries, so that the monorepo can grow without collapsing everything into one service.
+- As a user, I want my insights screen to come from a dedicated analytics API, so that trend computation and dashboard queries stay optimized for read scenarios.
 
 ## Tech stack
 
@@ -266,7 +379,7 @@ This worker expects the `ServiceBus` connection string from `src/Services/Habit.
 These projects exist in the solution but are not yet part of the main product loop:
 
 ```bash
-dotnet run --project src/Services/Analytic.API/Analytic.API.csproj
+dotnet run --project src/Services/Analytics.API/Analytics.API.csproj
 dotnet run --project src/Services/Notifications.Worker/Notifications.Worker.csproj
 dotnet run --project src/Services/Habit.Functions/Habit.Functions.csproj
 ```
@@ -292,12 +405,13 @@ Development configuration currently expects:
 
 ## Current gaps and next architecture steps
 
-- Raise and persist domain events more consistently from the aggregates.
-- Implement a real outbox to guarantee reliable event publication.
+- Align all aggregates to a single domain-event mechanism (`Entity.DomainEvents`) and remove divergent event lists.
+- Raise events directly from aggregate behavior methods to reinforce a rich domain model.
+- Implement a real outbox and relay flow to guarantee reliable event publication.
 - Replace mocked mobile auth and local habit state with API-backed flows.
-- Turn `Notifications.Worker`, `Analytic.API`, and `Habit.Functions` into real bounded execution paths.
+- Turn `Notifications.Worker`, `Analytics.API`, and `Habit.Functions` into real bounded execution paths.
 - Close the loop between frontend actions, backend persistence, and asynchronous downstream processing.
 
 ## Summary
 
-Habitoo is already more than a UI prototype, but it is not yet a fully integrated product. The mobile app is currently optimized for UX iteration, while the backend has the beginnings of a serious event-driven architecture centered on `Habit.API` and `Habit.Worker`. The next meaningful step is to connect the frontend to the backend and harden the event pipeline with proper domain-event emission and an outbox implementation.
+Habitoo is already more than a UI prototype, but it is not yet a fully integrated product. The mobile app is currently optimized for UX iteration, while the backend has the beginnings of a serious event-driven architecture centered on `Habit.API`, `Habit.Worker`, and a future `Analytics.API` read boundary. The next meaningful step is to connect the frontend to the backend, harden the event pipeline with proper domain-event emission and an outbox implementation, and feed real insight projections through the analytics service.
